@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EL CHULO — Tienda de Moda</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a; --white: #fafafa; --accent: #e8462a; --gold: #c9a84c;
+    --soft: #f4f1ec; --gray: #888; --light-gray: #e8e8e8; --card-bg: #fff; --nav-height: 64px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--soft); color: var(--black); overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--soft); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+  .top-bar { background: var(--black); color: var(--white); text-align:center; font-size: 12px; letter-spacing: 2px; padding: 8px; text-transform: uppercase; }
+
+  /* ── NAV: Safari sticky fix ── */
+  nav {
+    position: -webkit-sticky; /* prefijo necesario para Safari */
+    position: sticky;
+    top: 0; z-index: 1000; background: var(--white); border-bottom: 2px solid var(--black);
+    height: var(--nav-height); display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center; padding: 0 2rem; gap: 1rem;
+  }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 4px; color: var(--black); text-decoration: none; margin-right: auto; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: -webkit-flex; display: flex; gap: 0.25rem; }
+  /* Safari aplica estilos nativos a los botones — forzamos apariencia plana */
+  .gender-btn {
+    -webkit-appearance: none; appearance: none;
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 1.05rem;
+    padding: 8px 20px; border: 2px solid var(--black);
+    background: transparent; cursor: pointer; transition: all 0.2s;
+    border-radius: 0; /* Safari redondea botones por defecto */
+  }
+  .gender-btn:hover, .gender-btn.active { background: var(--black); color: var(--white); }
+  .gender-btn.women.active { background: var(--accent); border-color: var(--accent); color: var(--white); }
+  .cart-btn {
+    -webkit-appearance: none; appearance: none;
+    position: relative; background: var(--accent); color: var(--white); border: none;
+    padding: 10px 20px; cursor: pointer; font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem; letter-spacing: 2px;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center; gap: 8px;
+    transition: -webkit-transform 0.15s; transition: transform 0.15s;
+    border-radius: 0;
+  }
+  .cart-btn:hover { -webkit-transform: scale(1.05); transform: scale(1.05); }
+  .cart-count {
+    background: var(--black); color: var(--white); border-radius: 50%;
+    width: 20px; height: 20px; font-size: 11px;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif; font-weight: 600;
+  }
+
+  /* ── HERO: flexbox en vez de grid para máxima compatibilidad Safari ── */
+  .hero {
+    background: var(--black); color: var(--white);
+    display: -webkit-flex; display: flex;
+    -webkit-flex-direction: row; flex-direction: row;
+    min-height: 480px; overflow: hidden;
+  }
+  .hero-text {
+    padding: 5rem 4rem;
+    display: -webkit-flex; display: flex;
+    -webkit-flex-direction: column; flex-direction: column;
+    -webkit-justify-content: center; justify-content: center;
+    -webkit-flex: 1 1 50%; flex: 1 1 50%; /* equivale a 1fr */
+    min-width: 0;
+  }
+  .hero-eyebrow { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+  /* clamp() no funciona en Safari < 13.1 — usamos font-size fijo + vw con max via media query */
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem; /* fallback base */
+    font-size: clamp(3.5rem, 7vw, 6rem);
+    line-height: 0.9; margin-bottom: 1.5rem;
+  }
+  @media (max-width: 700px)  { .hero-title { font-size: 3.5rem; } }
+  @media (min-width: 1200px) { .hero-title { font-size: 6rem; } }
+  .hero-title em { font-family: 'Playfair Display', serif; color: var(--accent); }
+  .hero-sub { color: #aaa; font-size: 15px; margin-bottom: 2rem; max-width: 340px; line-height: 1.6; }
+  .hero-cta {
+    display: inline-block; background: var(--accent); color: var(--white);
+    padding: 14px 36px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px;
+    font-size: 1.1rem; border: none; cursor: pointer;
+    -webkit-transition: background 0.2s, -webkit-transform 0.15s;
+    transition: background 0.2s, transform 0.15s;
+    text-decoration: none; -webkit-appearance: none; appearance: none; border-radius: 0;
+    -webkit-align-self: flex-start; align-self: flex-start; /* no se estira al ancho completo */
+  }
+  .hero-cta:hover { background: #c73820; -webkit-transform: translateY(-2px); transform: translateY(-2px); }
+  .hero-visual {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    -webkit-flex: 1 1 50%; flex: 1 1 50%;
+    position: relative; overflow: hidden; min-height: 480px;
+  }
+  .hero-visual::before {
+    content: ''; position: absolute; top:0; right:0; bottom:0; left:0;
+    background: radial-gradient(circle at 60% 40%, rgba(232,70,42,0.15) 0%, transparent 60%);
+  }
+  .hero-mannequin { font-size: 10rem; opacity: 0.6; -webkit-animation: float 4s ease-in-out infinite; animation: float 4s ease-in-out infinite; }
+  @-webkit-keyframes float { 0%,100%{-webkit-transform:translateY(0);transform:translateY(0)} 50%{-webkit-transform:translateY(-16px);transform:translateY(-16px)} }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
+
+  /* ── CATEGORY BAR: sticky con prefijo Safari ── */
+  .category-bar {
+    background: var(--white); border-bottom: 1px solid var(--light-gray);
+    padding: 0 2rem; display: -webkit-flex; display: flex; gap: 0;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; /* scroll suave en iOS */
+    position: -webkit-sticky; position: sticky;
+    top: var(--nav-height); z-index: 900;
+  }
+  .category-bar::-webkit-scrollbar { height: 0; }
+  .cat-tab {
+    -webkit-appearance: none; appearance: none;
+    padding: 16px 22px; border: none; background: transparent;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+    white-space: nowrap; border-bottom: 3px solid transparent;
+    transition: all 0.2s; color: var(--gray); border-radius: 0;
+  }
+  .cat-tab:hover { color: var(--black); }
+  .cat-tab.active { color: var(--black); border-bottom-color: var(--accent); font-weight: 600; }
+
+  .shop-section { padding: 3rem 2rem 4rem; }
+  .section-header { display: -webkit-flex; display: flex; -webkit-align-items: baseline; align-items: baseline; gap: 1rem; margin-bottom: 2rem; }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 3px; }
+  .section-count { color: var(--gray); font-size: 13px; }
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.5rem; }
+
+  .product-card { background: var(--card-bg); overflow: hidden; transition: -webkit-transform 0.25s, transform 0.25s, box-shadow 0.25s; cursor: pointer; position: relative; }
+  .product-card:hover { -webkit-transform: translateY(-6px); transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
+  .badge { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 8px; }
+  .badge-new { background: var(--black); color: var(--white); }
+  .badge-sale { background: var(--accent); color: var(--white); }
+  .badge-hot { background: var(--gold); color: var(--black); }
+  .wishlist-btn {
+    -webkit-appearance: none; appearance: none;
+    position: absolute; top: 12px; right: 12px; z-index: 2;
+    background: rgba(255,255,255,0.85); border: none; width: 34px; height: 34px;
+    border-radius: 50%; cursor: pointer; font-size: 15px;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    transition: all 0.2s;
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  }
+  .wishlist-btn:hover { background: var(--white); -webkit-transform: scale(1.1); transform: scale(1.1); }
+  .wishlist-btn.active { color: var(--accent); }
+
+  /* ── CARRUSEL: aspect-ratio con fallback para Safari antiguo ── */
+  .product-carousel {
+    position: relative; width: 100%;
+    /* Fallback para Safari < 15 que no soporta aspect-ratio */
+    padding-top: 133.33%; /* 4:3 = 100/(3/4)*100 */
+    overflow: hidden; background: linear-gradient(135deg, #e8e8e8, #d0d0d0); cursor: zoom-in;
+  }
+  /* Safari 15+ sí soporta aspect-ratio, lo sobreescribimos */
+  @supports (aspect-ratio: 3/4) {
+    .product-carousel { padding-top: 0; aspect-ratio: 3/4; }
+  }
+  .carousel-track {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: -webkit-flex; display: flex; height: 100%;
+    -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+  }
+  /* Cuando aspect-ratio es soportado, quitar el posicionamiento absoluto del track */
+  @supports (aspect-ratio: 3/4) {
+    .carousel-track { position: static; }
+  }
+  .carousel-slide {
+    min-width: 100%; height: 100%;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    font-size: 5rem; -webkit-flex-shrink: 0; flex-shrink: 0;
+    background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
+  }
+  .carousel-slide img {
+    width: 100%; height: 100%;
+    object-fit: cover; -o-object-fit: cover;
+    object-position: center top; -o-object-position: center top;
+    display: block;
+  }
+
+  .carousel-arrow {
+    -webkit-appearance: none; appearance: none;
+    position: absolute; top: 50%; -webkit-transform: translateY(-50%); transform: translateY(-50%);
+    background: rgba(255,255,255,0.9); border: none; width: 28px; height: 28px;
+    border-radius: 50%; cursor: pointer; font-size: 12px;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    z-index: 3; opacity: 0; transition: opacity 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .product-carousel:hover .carousel-arrow { opacity: 1; }
+  .carousel-arrow.prev { left: 6px; }
+  .carousel-arrow.next { right: 6px; }
+  .carousel-arrow:hover { background: var(--white); -webkit-transform: translateY(-50%) scale(1.1); transform: translateY(-50%) scale(1.1); }
+  .carousel-dots {
+    position: absolute; bottom: 8px; left: 50%;
+    -webkit-transform: translateX(-50%); transform: translateX(-50%);
+    display: -webkit-flex; display: flex; gap: 5px; z-index: 3;
+  }
+  .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); border: none; cursor: pointer; padding: 0; transition: all 0.2s; -webkit-appearance: none; appearance: none; }
+  .carousel-dot.active { background: var(--white); -webkit-transform: scale(1.3); transform: scale(1.3); }
+  .zoom-icon {
+    -webkit-appearance: none; appearance: none;
+    position: absolute; bottom: 10px; right: 10px; z-index: 3;
+    background: rgba(0,0,0,0.5); color: var(--white); border: none; border-radius: 50%;
+    width: 28px; height: 28px; font-size: 13px;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    cursor: zoom-in; opacity: 0; transition: opacity 0.2s;
+  }
+  .product-carousel:hover .zoom-icon { opacity: 1; }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    position: fixed; top:0; right:0; bottom:0; left:0; /* inset fallback */
+    background: rgba(0,0,0,0.95); z-index: 5000;
+    display: -webkit-flex; display: flex;
+    -webkit-flex-direction: column; flex-direction: column;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .lightbox.open { opacity: 1; pointer-events: all; }
+  .lightbox-header { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; padding: 1rem 1.5rem; -webkit-flex-shrink: 0; flex-shrink: 0; }
+  .lightbox-title { font-family:'Bebas Neue',sans-serif; color: var(--white); font-size: 1.3rem; letter-spacing: 2px; }
+  .lightbox-close { background: none; border: none; color: var(--white); font-size: 2rem; cursor: pointer; line-height: 1; transition: -webkit-transform 0.2s; transition: transform 0.2s; padding: 4px 8px; -webkit-appearance: none; appearance: none; }
+  .lightbox-close:hover { -webkit-transform: rotate(90deg); transform: rotate(90deg); color: var(--accent); }
+  .lightbox-main { -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; position: relative; overflow: hidden; min-height: 0; }
+  .lightbox-track { display: -webkit-flex; display: flex; height: 100%; width: 100%; -webkit-transition: -webkit-transform 0.4s cubic-bezier(0.4,0,0.2,1); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); }
+  .lightbox-slide { min-width: 100%; height: 100%; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; -webkit-flex-shrink: 0; flex-shrink: 0; padding: 1rem; }
+  /* min() no funciona en Safari antiguo — usamos max-width directamente */
+  .lightbox-slide .lb-img-wrap { width: 90vw; max-width: 600px; max-height: 70vh; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-size: 14rem; }
+  .lightbox-slide .lb-img-wrap img {
+    max-width: 100%; max-height: 70vh; width: auto; height: auto;
+    object-fit: contain; -o-object-fit: contain;
+    border-radius: 2px; box-shadow: 0 8px 60px rgba(0,0,0,0.6); display: block;
+  }
+  .lightbox-arrow {
+    -webkit-appearance: none; appearance: none;
+    position: absolute; top: 50%; -webkit-transform: translateY(-50%); transform: translateY(-50%);
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white); width: 48px; height: 48px; border-radius: 50%; font-size: 1.2rem;
+    cursor: pointer; z-index: 2;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    transition: all 0.2s; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  }
+  .lightbox-arrow:hover { background: var(--accent); border-color: var(--accent); -webkit-transform: translateY(-50%) scale(1.05); transform: translateY(-50%) scale(1.05); }
+  .lightbox-arrow.prev { left: 1rem; }
+  .lightbox-arrow.next { right: 1rem; }
+  .lightbox-footer { padding: 1rem 1.5rem 1.5rem; -webkit-flex-shrink: 0; flex-shrink: 0; }
+  .lightbox-thumbnails { display: -webkit-flex; display: flex; gap: 8px; -webkit-justify-content: center; justify-content: center; margin-bottom: 1rem; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
+  .lb-thumb { width: 56px; height: 70px; background: rgba(255,255,255,0.08); border: 2px solid transparent; cursor: pointer; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-size: 1.8rem; transition: all 0.2s; border-radius: 2px; overflow: hidden; -webkit-flex-shrink: 0; flex-shrink: 0; }
+  .lb-thumb img { width: 100%; height: 100%; object-fit: cover; -o-object-fit: cover; object-position: center top; display: block; }
+  .lb-thumb.active { border-color: var(--accent); }
+  .lb-thumb:hover { border-color: var(--white); }
+  .lightbox-counter { text-align: center; color: rgba(255,255,255,0.5); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+
+  .product-info { padding: 14px 16px 18px; }
+  .product-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .product-brand { font-size: 11px; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .product-price-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .price-current { font-size: 16px; font-weight: 700; color: var(--black); }
+  .price-old { font-size: 13px; color: var(--gray); text-decoration: line-through; }
+  .price-discount { font-size: 11px; color: var(--accent); font-weight: 700; }
+  .add-cart-btn { -webkit-appearance: none; appearance: none; width: 100%; padding: 10px; border: 2px solid var(--black); background: transparent; font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 1rem; cursor: pointer; transition: all 0.2s; border-radius: 0; }
+  .add-cart-btn:hover { background: var(--black); color: var(--white); }
+  .add-cart-btn.added { background: var(--accent); border-color: var(--accent); color: var(--white); }
+
+  .cart-overlay { position: fixed; top:0; right:0; bottom:0; left:0; background: rgba(0,0,0,0.5); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .cart-overlay.open { opacity: 1; pointer-events: all; }
+  .cart-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100vw; background: var(--white); z-index: 2001; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-transform: translateX(100%); transform: translateX(100%); -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4,0,0.2,1); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); box-shadow: -8px 0 40px rgba(0,0,0,0.15); }
+  .cart-panel.open { -webkit-transform: translateX(0); transform: translateX(0); }
+  .cart-header { padding: 1.5rem 1.5rem 1rem; border-bottom: 2px solid var(--black); display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; }
+  .cart-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 3px; }
+  .cart-close { background: none; border: none; font-size: 1.8rem; cursor: pointer; line-height: 1; transition: -webkit-transform 0.2s; transition: transform 0.2s; -webkit-appearance: none; appearance: none; }
+  .cart-close:hover { -webkit-transform: rotate(90deg); transform: rotate(90deg); }
+  .cart-items { -webkit-flex: 1; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 1rem 1.5rem; }
+  .cart-empty { text-align: center; padding: 4rem 2rem; color: var(--gray); }
+  .cart-empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .cart-item { display: -webkit-flex; display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--light-gray); -webkit-animation: slideIn 0.3s ease; animation: slideIn 0.3s ease; }
+  @-webkit-keyframes slideIn { from { opacity:0; -webkit-transform:translateX(20px); transform:translateX(20px) } to { opacity:1; -webkit-transform:none; transform:none } }
+  @keyframes slideIn { from { opacity:0; transform:translateX(20px) } to { opacity:1; transform:none } }
+  .cart-item-img { width: 72px; height: 90px; background: var(--soft); display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-size: 2.5rem; -webkit-flex-shrink: 0; flex-shrink: 0; overflow: hidden; }
+  .cart-item-img img { width: 100%; height: 100%; object-fit: cover; -o-object-fit: cover; object-position: center top; display: block; }
+  .cart-item-details { -webkit-flex: 1; flex: 1; }
+  .cart-item-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .cart-item-meta { font-size: 12px; color: var(--gray); margin-bottom: 8px; }
+  .cart-item-price { font-size: 15px; font-weight: 700; }
+  .cart-item-actions { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 8px; margin-top: 8px; }
+  .qty-btn { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border: 1px solid var(--light-gray); background: none; cursor: pointer; font-size: 1rem; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; transition: all 0.15s; border-radius: 0; }
+  .qty-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+  .qty-display { font-weight: 600; font-size: 14px; min-width: 20px; text-align: center; }
+  .remove-btn { background: none; border: none; color: var(--gray); cursor: pointer; font-size: 18px; margin-left: auto; transition: color 0.2s; -webkit-appearance: none; appearance: none; }
+  .remove-btn:hover { color: var(--accent); }
+  .cart-footer { padding: 1.5rem; border-top: 2px solid var(--black); }
+  .cart-total-row { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; -webkit-align-items: center; align-items: center; margin-bottom: 1rem; }
+  .cart-total-label { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 1rem; }
+  .cart-total-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; }
+  .checkout-btn { -webkit-appearance: none; appearance: none; width: 100%; padding: 16px; background: var(--black); color: var(--white); border: none; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 3px; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; border-radius: 0; }
+  .checkout-btn:hover { background: var(--accent); }
+  .share-btn { -webkit-appearance: none; appearance: none; width: 100%; padding: 14px; background: transparent; color: var(--black); border: 2px solid var(--black); font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 3px; cursor: pointer; transition: all 0.2s; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; gap: 8px; border-radius: 0; }
+  .share-btn:hover { background: var(--gold); border-color: var(--gold); }
+
+  /* ── FORMULARIO DE PEDIDO ── */
+  .checkout-overlay {
+    position: fixed; top:0; right:0; bottom:0; left:0; background: rgba(0,0,0,0.78);
+    z-index: 4000;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .checkout-overlay.open { opacity: 1; pointer-events: all; }
+  .checkout-form-box {
+    background: var(--white); width: 92%; max-width: 500px;
+    padding: 2.5rem 2.5rem 2rem; position: relative;
+    -webkit-transform: translateY(40px); transform: translateY(40px);
+    -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .checkout-overlay.open .checkout-form-box { -webkit-transform: translateY(0); transform: translateY(0); }
+  .checkout-form-close { -webkit-appearance: none; appearance: none; position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.6rem; cursor: pointer; transition: -webkit-transform 0.2s, transform 0.2s, color 0.2s; line-height: 1; }
+  .checkout-form-close:hover { -webkit-transform: rotate(90deg); transform: rotate(90deg); color: var(--accent); }
+  .checkout-form-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; margin-bottom: 0.3rem; }
+  .checkout-form-sub { color: var(--gray); font-size: 13px; margin-bottom: 1.6rem; line-height: 1.5; }
+
+  .form-order-summary {
+    background: var(--soft); padding: 1rem 1.2rem; margin-bottom: 1.8rem;
+    border-left: 4px solid var(--accent);
+  }
+  .form-order-summary h4 { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-bottom: 10px; font-weight: 700; }
+  .form-order-item { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; font-size: 13px; padding: 4px 0; color: var(--black); }
+  .form-order-item span:last-child { font-weight: 600; }
+  .form-order-total { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; font-size: 16px; font-weight: 700; margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; }
+
+  .form-group { margin-bottom: 1.3rem; }
+  .form-group label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 7px; }
+  .form-group input,
+  .form-group textarea {
+    width: 100%; padding: 12px 14px;
+    border: 2px solid var(--light-gray);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--black);
+    outline: none; transition: border-color 0.2s; background: var(--white); resize: none;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--black); }
+  .form-group input.error, .form-group textarea.error { border-color: var(--accent); }
+  .field-error { font-size: 11px; color: var(--accent); margin-top: 5px; display: none; font-weight: 600; }
+  .field-error.show { display: block; }
+
+  .confirm-whatsapp-btn {
+    width: 100%; padding: 16px; border: none; cursor: pointer;
+    background: #25D366; color: var(--white);
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 3px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background 0.2s; margin-top: 0.5rem;
+  }
+  .confirm-whatsapp-btn:hover { background: #1aad52; }
+
+  /* ── SHARE MODAL ── */
+  .modal-overlay {
+    position: fixed; top:0; right:0; bottom:0; left:0;
+    background: rgba(0,0,0,0.7); z-index: 3000;
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-justify-content: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--white); max-width: 480px; width: 90%;
+    padding: 2rem; position: relative;
+    -webkit-transform: scale(0.9); transform: scale(0.9);
+    -webkit-transition: -webkit-transform 0.3s; transition: transform 0.3s;
+  }
+  .modal-overlay.open .modal { -webkit-transform: scale(1); transform: scale(1); }
+  .modal-close { -webkit-appearance: none; appearance: none; position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; margin-bottom: 0.5rem; }
+  .modal-sub { color: var(--gray); font-size: 13px; margin-bottom: 1.5rem; }
+  .share-order-list { border: 1px solid var(--light-gray); max-height: 200px; overflow-y: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1.5rem; }
+  .share-order-item { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--light-gray); }
+  .share-order-item:last-child { border-bottom: none; }
+  .share-link-box { display: -webkit-flex; display: flex; gap: 8px; margin-bottom: 1.5rem; }
+  .share-link-input { -webkit-flex: 1; flex: 1; padding: 10px 12px; border: 2px solid var(--black); font-size: 12px; background: var(--soft); color: var(--gray); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; outline: none; border-radius: 0; -webkit-appearance: none; appearance: none; }
+  .copy-link-btn { -webkit-appearance: none; appearance: none; padding: 10px 18px; background: var(--black); color: var(--white); border: none; cursor: pointer; font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 0.95rem; transition: background 0.2s; white-space: nowrap; border-radius: 0; }
+  .copy-link-btn:hover { background: var(--accent); }
+  .share-icons { display: -webkit-flex; display: flex; gap: 10px; }
+  .share-icon-btn { -webkit-appearance: none; appearance: none; -webkit-flex: 1; flex: 1; padding: 12px 8px; border: 1px solid var(--light-gray); background: none; cursor: pointer; transition: all 0.2s; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; gap: 4px; font-size: 1.3rem; border-radius: 0; }
+  .share-icon-btn span { font-size: 10px; font-family: 'DM Sans', sans-serif; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; }
+  .share-icon-btn:hover { background: var(--soft); border-color: var(--black); }
+
+  /* ── TOAST: Safari no interpreta bien el transform compuesto en una propiedad ── */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%;
+    -webkit-transform: translateX(-50%) translateY(80px);
+    transform: translateX(-50%) translateY(80px);
+    background: var(--black); color: var(--white); padding: 12px 24px;
+    font-size: 14px; letter-spacing: 1px; z-index: 6000;
+    -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+  }
+  .toast.show {
+    -webkit-transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    /* Hero: apila verticalmente en móvil */
+    .hero { -webkit-flex-direction: column; flex-direction: column; }
+    .hero-visual { display: none; }
+    .hero-text { padding: 3rem 1.5rem; -webkit-flex: none; flex: none; width: 100%; }
+    .nav-logo { font-size: 1.5rem; }
+    .gender-btn { padding: 6px 12px; font-size: 0.9rem; }
+    .shop-section { padding: 2rem 1rem; }
+    .product-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .cart-panel { width: 100%; }
+    .checkout-form-box { padding: 1.5rem; }
+    nav { top: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">🔥 Envío gratis en pedidos mayores — ¡Rebajas hasta el 50% de descuento!</div>
+
+<nav>
+  <a class="nav-logo" href="#">EL <span>CHULO</span></a>
+  <div class="nav-links">
+    <button class="gender-btn active" onclick="setGender('men',this)">HOMBRE</button>
+    <button class="gender-btn women" onclick="setGender('women',this)">MUJER</button>
+  </div>
+  <button class="cart-btn" onclick="toggleCart()">
+    🛒 CARRITO <span class="cart-count" id="cartCount">0</span>
+  </button>
+</nav>
+
+<section class="hero">
+  <div class="hero-text">
+    <p class="hero-eyebrow">Colección de Verano 2026</p>
+    <h1 class="hero-title">VÍSTETE<br>PARA <em>IMPRESIONAR</em><br>AL MUNDO</h1>
+    <p class="hero-sub">Explora las últimas tendencias en streetwear, casual y moda premium, todo a precios que no te detienen.</p>
+    <button class="hero-cta" onclick="scrollToShop()">COMPRAR AHORA</button>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-mannequin">👗</div>
+  </div>
+</section>
+
+<div class="category-bar">
+  <button class="cat-tab active" onclick="setCategory('all',this)">Todo</button>
+  <button class="cat-tab" onclick="setCategory('tshirts',this)">Camisetas</button>
+  <button class="cat-tab" onclick="setCategory('pants',this)">Pantalones</button>
+  <button class="cat-tab" onclick="setCategory('pullovers',this)">Suéteres</button>
+  <button class="cat-tab" onclick="setCategory('shoes',this)">Zapatos</button>
+  <button class="cat-tab" onclick="setCategory('hats',this)">Gorras</button>
+  <button class="cat-tab" onclick="setCategory('garments',this)">Accesorios</button>
+</div>
+
+<section class="shop-section" id="shopSection">
+  <div class="section-header">
+    <h2 class="section-title" id="sectionTitle">COLECCIÓN HOMBRE</h2>
+    <span class="section-count" id="sectionCount"></span>
+  </div>
+  <div class="product-grid" id="productGrid"></div>
+</section>
+
+<!-- CARRITO -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <span class="cart-title">TU CARRITO</span>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">
+      <div class="cart-empty-icon">🛍️</div>
+      <p style="font-weight:600;margin-bottom:8px">Tu carrito está vacío</p>
+      <p style="font-size:13px;color:var(--gray)">¡Agrega algunos artículos para comenzar!</p>
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total-row">
+      <span class="cart-total-label">TOTAL</span>
+      <span class="cart-total-price" id="cartTotal">$0</span>
+    </div>
+    <button class="checkout-btn" onclick="openCheckoutForm()">PROCEDER AL PAGO</button>
+    <button class="share-btn" onclick="openShareModal()">📤 COMPARTIR ESTE PEDIDO</button>
+  </div>
+</div>
+
+<!-- FORMULARIO DE PEDIDO -->
+<div class="checkout-overlay" id="checkoutOverlay">
+  <div class="checkout-form-box">
+    <button class="checkout-form-close" onclick="closeCheckoutForm()">✕</button>
+    <h2 class="checkout-form-title">CONFIRMAR PEDIDO</h2>
+    <p class="checkout-form-sub">Completa tus datos y te contactaremos por WhatsApp para coordinar la entrega 🚚</p>
+
+    <div class="form-order-summary">
+      <h4>📦 Resumen del pedido</h4>
+      <div id="formOrderItems"></div>
+      <div class="form-order-total">
+        <span>TOTAL</span>
+        <span id="formOrderTotal">$0</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>👤 Nombre completo *</label>
+      <input type="text" id="clientName" placeholder="Ej: Juan Pérez García" maxlength="80">
+      <div class="field-error" id="nameError">⚠ Por favor ingresa tu nombre completo</div>
+    </div>
+
+    <div class="form-group">
+      <label>📞 Número de teléfono *</label>
+      <input type="tel" id="clientPhone" placeholder="Ej: 55512345" maxlength="20">
+      <div class="field-error" id="phoneError">⚠ Por favor ingresa tu número de teléfono</div>
+    </div>
+
+    <div class="form-group">
+      <label>🏠 Dirección de entrega *</label>
+      <textarea id="clientAddress" rows="3" placeholder="Calle, número, reparto, municipio, provincia..."></textarea>
+      <div class="field-error" id="addressError">⚠ Por favor ingresa tu dirección completa</div>
+    </div>
+
+    <div class="form-group">
+      <label>📝 Nota adicional (opcional)</label>
+      <textarea id="clientNote" rows="2" placeholder="Ej: talla, color preferido, referencia de entrega..."></textarea>
+    </div>
+
+    <button class="confirm-whatsapp-btn" onclick="confirmOrder()">
+      💬 ENVIAR PEDIDO POR WHATSAPP
+    </button>
+  </div>
+</div>
+
+<!-- MODAL COMPARTIR -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeShareModal()">✕</button>
+    <h2 class="modal-title">COMPARTIR PEDIDO</h2>
+    <p class="modal-sub">¡Muéstrale a tus amigos lo que vas a comprar!</p>
+    <div class="share-order-list" id="shareOrderList"></div>
+    <div class="share-link-box">
+      <input class="share-link-input" id="shareLinkInput" readonly placeholder="Generando enlace...">
+      <button class="copy-link-btn" onclick="copyShareLink()">COPIAR</button>
+    </div>
+    <div class="share-icons">
+      <button class="share-icon-btn" onclick="shareVia('whatsapp')">💬<span>WhatsApp</span></button>
+      <button class="share-icon-btn" onclick="shareVia('twitter')">🐦<span>Twitter</span></button>
+      <button class="share-icon-btn" onclick="shareVia('facebook')">📘<span>Facebook</span></button>
+      <button class="share-icon-btn" onclick="shareVia('email')">📧<span>Correo</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-header">
+    <span class="lightbox-title" id="lbTitle"></span>
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  </div>
+  <div class="lightbox-main" id="lbMain">
+    <div class="lightbox-track" id="lbTrack"></div>
+    <button class="lightbox-arrow prev" id="lbPrev" onclick="lbMove(-1)">&#8592;</button>
+    <button class="lightbox-arrow next" id="lbNext" onclick="lbMove(1)">&#8594;</button>
+  </div>
+  <div class="lightbox-footer">
+    <div class="lightbox-thumbnails" id="lbThumbs"></div>
+    <div class="lightbox-counter" id="lbCounter"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── PRODUCTOS ─────────────────────────────────────────────────────────
+// IMPORTANTE PARA NETLIFY:
+// Las rutas de imágenes deben ser relativas a la raíz del sitio.
+// Coloca tus imágenes en una carpeta /images/ en tu proyecto de Netlify.
+// Ejemplo: images: ['images/camisa1.jpg']
+// Si tus imágenes están en la raíz, usa: images: ['camisa1.jpg']
+const products = {
+  men: [
+    { id:'m1',  name:'Camisa negra de perlas',           brand:'EL CHULO', price:13000, oldPrice:null,  category:'tshirts',   images:['images/camisa1.jpg'],  badge:'sale', discount:'' },
+    { id:'m2',  name:'Mono deportivo',                   brand:'EL CHULO', price:8000,  oldPrice:null,  category:'pants',     images:['images/mono.jpg'],     badge:'new' },
+    { id:'m3',  name:'Pantalón de mezclilla',             brand:'EL CHULO', price:15000, oldPrice:null,  category:'pants',     images:['images/pantalon1.jpg'],badge:'hot', discount:'-13%' },
+    { id:'m4',  name:'Adidas Campus',                    brand:'EL CHULO', price:20000, oldPrice:null,  category:'shoes',     images:['images/zapat.jpg'],    badge:'sale', discount:'-10%' },
+    { id:'m5',  name:'Pantalón Cargo Pierna Ancha',       brand:'EL CHULO', price:12000, oldPrice:null,  category:'pants',     images:['images/shor1.jpg'],    badge:'new' },
+    { id:'m6',  name:'Jeans Denim Clásico',               brand:'EL CHULO', price:1600,  oldPrice:null,  category:'pullovers', images:['images/abrigo.jpg'],   badge:'hot', discount:'' },
+    { id:'m7',  name:'Short Kingpin perlado',             brand:'EL CHULO', price:14000, oldPrice:null,  category:'pants',     images:['images/shorP2.jpg'],   badge:'sale', discount:'' },
+    { id:'m8',  name:'Pullover de Punto Media Cremallera',brand:'EL CHULO', price:1500,  oldPrice:null,  category:'pullovers', images:['images/camisalarga.jpg'],badge:'new' },
+    { id:'m9',  name:'Pantalón Vaquero',                  brand:'EL CHULO', price:1700,  oldPrice:3000,  category:'pants',     images:['images/vaquero.jpg'],  badge:null },
+    { id:'m10', name:'Zapatillas Low-Top',                brand:'EL CHULO', price:1800,  oldPrice:3200,  category:'shoes',     images:['👟'], badge:'sale', discount:'' },
+    { id:'m11', name:'Botas Plataforma Gruesa',           brand:'EL CHULO', price:2400,  oldPrice:null,  category:'shoes',     images:['👞'], badge:'new' },
+    { id:'m12', name:'Alpargatas de Lona',                brand:'EL CHULO', price:1000,  oldPrice:1600,  category:'shoes',     images:['👟'], badge:'hot', discount:'-37%' },
+    { id:'m13', name:'Gorra Bordada con Logo',            brand:'EL CHULO', price:400,   oldPrice:800,   category:'hats',      images:['🧢'], badge:'sale', discount:'-50%' },
+    { id:'m14', name:'Sombrero Cubo de Lana',             brand:'EL CHULO', price:600,   oldPrice:null,  category:'hats',      images:['🎩'], badge:'new' },
+    { id:'m15', name:'Snapback Vintage',                  brand:'EL CHULO', price:500,   oldPrice:1000,  category:'hats',      images:['🧢'], badge:null },
+    { id:'m16', name:'Gabardina Trench',                  brand:'EL CHULO', price:2800,  oldPrice:5200,  category:'garments',  images:['🧥'], badge:'sale', discount:'-46%' },
+    { id:'m17', name:'Chaqueta de Mezclilla',             brand:'EL CHULO', price:2000,  oldPrice:null,  category:'garments',  images:['🧥'], badge:'new' },
+    { id:'m18', name:'Blazer Sport',                      brand:'EL CHULO', price:3200,  oldPrice:5200,  category:'garments',  images:['🥼'], badge:'hot', discount:'-38%' },
+  ],
+  women: [
+    { id:'w1',  name:'Camiseta Crop Acanalada',          brand:'EL CHULO', price:500,  oldPrice:900,   category:'tshirts',   images:['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80'], badge:'sale', discount:'-45%' },
+    { id:'w2',  name:'Camiseta Estampado Floral',        brand:'EL CHULO', price:650,  oldPrice:null,  category:'tshirts',   images:['https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=600&q=80'], badge:'new' },
+    { id:'w3',  name:'Camiseta Tie-Dye Oversize',        brand:'EL CHULO', price:750,  oldPrice:1300,  category:'tshirts',   images:['https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=600&q=80'], badge:'hot', discount:'-42%' },
+    { id:'w4',  name:'Pantalón Tiro Alto Acampanado',    brand:'EL CHULO', price:1300, oldPrice:2200,  category:'pants',     images:['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&q=80'], badge:'sale', discount:'-41%' },
+    { id:'w5',  name:'Pantalón Lino Pierna Ancha',       brand:'EL CHULO', price:1500, oldPrice:null,  category:'pants',     images:['https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?w=600&q=80'], badge:'new' },
+    { id:'w6',  name:'Jeans Skinny Rotos',               brand:'EL CHULO', price:1400, oldPrice:2300,  category:'pants',     images:['https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80'], badge:null },
+    { id:'w7',  name:'Pullover Hombro Descubierto',      brand:'EL CHULO', price:1100, oldPrice:2000,  category:'pullovers', images:['https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=600&q=80'], badge:'sale', discount:'-45%' },
+    { id:'w8',  name:'Pullover Crop de Punto',           brand:'EL CHULO', price:1400, oldPrice:null,  category:'pullovers', images:['https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80'], badge:'new' },
+    { id:'w9',  name:'Suéter Oversize Trenzado',         brand:'EL CHULO', price:1800, oldPrice:3000,  category:'pullovers', images:['https://images.unsplash.com/photo-1583846783214-7229a91b20ed?w=600&q=80'], badge:null },
+    { id:'w10', name:'Botines de Tacón',                 brand:'EL CHULO', price:2200, oldPrice:3600,  category:'shoes',     images:['https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&q=80'], badge:'sale', discount:'-39%' },
+    { id:'w11', name:'Zapatillas con Plataforma',        brand:'EL CHULO', price:2000, oldPrice:null,  category:'shoes',     images:['https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80'], badge:'new' },
+    { id:'w12', name:'Sandalias con Tiras',              brand:'EL CHULO', price:1200, oldPrice:2000,  category:'shoes',     images:['https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=600&q=80'], badge:'hot', discount:'-40%' },
+    { id:'w13', name:'Sombrero con Lazo Satinado',       brand:'EL CHULO', price:500,  oldPrice:900,   category:'hats',      images:['https://images.unsplash.com/photo-1582791694770-cbdc9dda338f?w=600&q=80'], badge:'sale', discount:'-44%' },
+    { id:'w14', name:'Sombrero de Sol de Ganchillo',     brand:'EL CHULO', price:700,  oldPrice:null,  category:'hats',      images:['https://images.unsplash.com/photo-1529958030586-3aae4ca485ff?w=600&q=80'], badge:'new' },
+    { id:'w15', name:'Boina de Lana',                    brand:'EL CHULO', price:550,  oldPrice:1000,  category:'hats',      images:['https://images.unsplash.com/photo-1510598155-17c9571c2b95?w=600&q=80'], badge:null },
+    { id:'w16', name:'Vestido Midi Floral',              brand:'EL CHULO', price:1800, oldPrice:3200,  category:'garments',  images:['https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=600&q=80'], badge:'sale', discount:'-44%' },
+    { id:'w17', name:'Chaqueta Cuero Sintético',         brand:'EL CHULO', price:2400, oldPrice:null,  category:'garments',  images:['https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80'], badge:'new' },
+    { id:'w18', name:'Blazer Entallado',                 brand:'EL CHULO', price:2800, oldPrice:4400,  category:'garments',  images:['https://images.unsplash.com/photo-1548126032-079a0fb0099d?w=600&q=80'], badge:'hot', discount:'-36%' },
+  ]
+};
+
+// ── ESTADO ────────────────────────────────────────────────────────────
+let currentGender = 'men', currentCategory = 'all';
+let cart = {}, wishlist = new Set();
+const cardIndex = {};
+
+// ── UTILIDADES ────────────────────────────────────────────────────────
+function isUrl(s) { return s && (s.startsWith('http') || s.startsWith('/') || s.startsWith('images/')); }
+function fmt(n) { return '$' + Math.round(n).toLocaleString('es-CU'); }
+function findProduct(id) { return products.men.find(x=>x.id===id) || products.women.find(x=>x.id===id); }
+function slideHTML(src) {
+  return isUrl(src)
+    ? `<div class="carousel-slide"><img src="${src}" alt="producto" loading="lazy"></div>`
+    : `<div class="carousel-slide">${src}</div>`;
+}
+function thumbHTML(src) { return isUrl(src) ? `<img src="${src}" alt="miniatura" loading="lazy">` : src; }
+
+// ── RENDERIZAR PRODUCTOS ──────────────────────────────────────────────
+function renderProducts() {
+  const list = products[currentGender].filter(p => currentCategory==='all' || p.category===currentCategory);
+  document.getElementById('sectionTitle').textContent = `COLECCIÓN ${currentGender==='men'?'HOMBRE':'MUJER'}`;
+  document.getElementById('sectionCount').textContent = `${list.length} artículos`;
+  document.getElementById('productGrid').innerHTML = list.map(p => {
+    const inCart = cart[p.id] ? cart[p.id].qty : 0;
+    const inWish = wishlist.has(p.id);
+    const imgs = p.images && p.images.length ? p.images : ['❓'];
+    cardIndex[p.id] = cardIndex[p.id] || 0;
+    const ci = cardIndex[p.id];
+    const dots = imgs.length > 1 ? `<div class="carousel-dots">${imgs.map((_,i)=>`<button class="carousel-dot ${i===ci?'active':''}" onclick="cardGoTo('${p.id}',${i},event)"></button>`).join('')}</div>` : '';
+    const arrows = imgs.length > 1 ? `<button class="carousel-arrow prev" onclick="cardMove('${p.id}',-1,event)">&#8592;</button><button class="carousel-arrow next" onclick="cardMove('${p.id}',1,event)">&#8594;</button>` : '';
+    return `
+      <div class="product-card" id="card-${p.id}">
+        ${p.badge ? `<span class="badge badge-${p.badge}">${p.badge==='sale'?(p.discount?p.discount+' DESC':'OFERTA'):p.badge==='new'?'NUEVO':'TOP'}</span>` : ''}
+        <button class="wishlist-btn ${inWish?'active':''}" onclick="toggleWishlist('${p.id}',this)" title="Favoritos">${inWish?'❤️':'🤍'}</button>
+        <div class="product-carousel" id="carousel-${p.id}">
+          <div class="carousel-track" id="track-${p.id}" style="transform:translateX(-${ci*100}%)">${imgs.map(src=>slideHTML(src)).join('')}</div>
+          ${arrows}${dots}
+          <button class="zoom-icon" onclick="openLightbox('${p.id}',${ci},event)" title="Ver completa">🔍</button>
+        </div>
+        <div class="product-info">
+          <div class="product-brand">${p.brand}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price-row">
+            <span class="price-current">${fmt(p.price)}</span>
+            ${p.oldPrice ? `<span class="price-old">${fmt(p.oldPrice)}</span>` : ''}
+            ${p.discount ? `<span class="price-discount">${p.discount}</span>` : ''}
+          </div>
+          <button class="add-cart-btn ${inCart>0?'added':''}" onclick="addToCart('${p.id}')">
+            ${inCart>0 ? `✓ EN CARRITO (${inCart})` : '+ AGREGAR AL CARRITO'}
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+
+  list.forEach(p => {
+    const carousel = document.getElementById(`carousel-${p.id}`);
+    if (carousel) {
+      carousel.addEventListener('click', e => {
+        if (!e.target.closest('.carousel-arrow,.carousel-dot,.zoom-icon,.wishlist-btn')) {
+          openLightbox(p.id, cardIndex[p.id]||0, e);
+        }
+      });
+    }
+  });
+}
+
+// ── CARRUSEL ──────────────────────────────────────────────────────────
+function cardMove(id, dir, e) {
+  e.stopPropagation();
+  const p = findProduct(id); if(!p) return;
+  cardIndex[id] = ((cardIndex[id]||0)+dir+p.images.length) % p.images.length;
+  updateCardCarousel(id, cardIndex[id]);
+}
+function cardGoTo(id, idx, e) {
+  e.stopPropagation(); cardIndex[id]=idx; updateCardCarousel(id,idx);
+}
+function updateCardCarousel(id, idx) {
+  const t = document.getElementById(`track-${id}`); if(t) t.style.transform=`translateX(-${idx*100}%)`;
+  const c = document.getElementById(`carousel-${id}`);
+  if(c) c.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+// ── LIGHTBOX ──────────────────────────────────────────────────────────
+let lbProduct=null, lbCurrent=0;
+function openLightbox(id, startIdx, e) {
+  if(e) e.stopPropagation();
+  lbProduct = findProduct(id); if(!lbProduct) return;
+  lbCurrent = startIdx||0;
+  const imgs = lbProduct.images;
+  document.getElementById('lbTitle').textContent = lbProduct.name;
+  document.getElementById('lbTrack').innerHTML = imgs.map(src=>`<div class="lightbox-slide"><div class="lb-img-wrap">${isUrl(src)?`<img src="${src}" alt="producto">`:src}</div></div>`).join('');
+  document.getElementById('lbThumbs').innerHTML = imgs.map((src,i)=>`<div class="lb-thumb ${i===lbCurrent?'active':''}" onclick="lbGoTo(${i})">${thumbHTML(src)}</div>`).join('');
+  document.getElementById('lbPrev').style.display = imgs.length>1?'flex':'none';
+  document.getElementById('lbNext').style.display = imgs.length>1?'flex':'none';
+  lbUpdatePosition();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow=''; }
+function lbMove(dir) { if(!lbProduct) return; lbCurrent=(lbCurrent+dir+lbProduct.images.length)%lbProduct.images.length; lbUpdatePosition(); }
+function lbGoTo(idx) { lbCurrent=idx; lbUpdatePosition(); }
+function lbUpdatePosition() {
+  document.getElementById('lbTrack').style.transform=`translateX(-${lbCurrent*100}%)`;
+  document.getElementById('lbCounter').textContent=`${lbCurrent+1} / ${lbProduct.images.length}`;
+  document.querySelectorAll('.lb-thumb').forEach((t,i)=>t.classList.toggle('active',i===lbCurrent));
+}
+document.getElementById('lightbox').addEventListener('click',function(e){ if(e.target===this||e.target===document.getElementById('lbMain')) closeLightbox(); });
+document.addEventListener('keydown',function(e){
+  if(!document.getElementById('lightbox').classList.contains('open')) return;
+  if(e.key==='ArrowRight') lbMove(1); else if(e.key==='ArrowLeft') lbMove(-1); else if(e.key==='Escape') closeLightbox();
+});
+let lbTouchX=null;
+document.getElementById('lbMain').addEventListener('touchstart',e=>{lbTouchX=e.touches[0].clientX;});
+document.getElementById('lbMain').addEventListener('touchend',e=>{
+  if(lbTouchX===null) return;
+  if(Math.abs(lbTouchX-e.changedTouches[0].clientX)>40) lbMove(lbTouchX-e.changedTouches[0].clientX>0?1:-1);
+  lbTouchX=null;
+});
+
+// ── GÉNERO / CATEGORÍA ────────────────────────────────────────────────
+function setGender(gender, btn) {
+  currentGender=gender;
+  document.querySelectorAll('.gender-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelector('.hero-mannequin').textContent=gender==='women'?'👗':'🧍';
+  renderProducts();
+}
+function setCategory(cat, btn) {
+  currentCategory=cat;
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
+}
+function scrollToShop() { document.getElementById('shopSection').scrollIntoView({behavior:'smooth'}); }
+
+// ── CARRITO ───────────────────────────────────────────────────────────
+function addToCart(id) {
+  const p=findProduct(id); if(!p) return;
+  if(cart[id]) cart[id].qty++; else cart[id]={...p,qty:1};
+  updateCartUI(); renderProducts();
+  showToast(`🛒 ${p.name} agregado al carrito`);
+}
+function updateQty(id,delta) {
+  if(!cart[id]) return;
+  cart[id].qty+=delta;
+  if(cart[id].qty<=0) delete cart[id];
+  updateCartUI(); renderProducts();
+}
+function removeFromCart(id) { delete cart[id]; updateCartUI(); renderProducts(); }
+function toggleCart() {
+  document.getElementById('cartPanel').classList.toggle('open');
+  document.getElementById('cartOverlay').classList.toggle('open');
+}
+function updateCartUI() {
+  const items=Object.values(cart);
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+  const count=items.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cartCount').textContent=count;
+  document.getElementById('cartTotal').textContent=fmt(total);
+  const container=document.getElementById('cartItems');
+  if(items.length===0){
+    container.innerHTML=`<div class="cart-empty"><div class="cart-empty-icon">🛍️</div><p style="font-weight:600;margin-bottom:8px">Tu carrito está vacío</p><p style="font-size:13px;color:var(--gray)">¡Agrega algunos artículos para comenzar!</p></div>`;
+    return;
+  }
+  container.innerHTML=items.map(i=>{
+    const firstImg=i.images&&i.images[0];
+    const imgHTML=firstImg&&isUrl(firstImg)
+      ?`<img src="${firstImg}" alt="${i.name}">`
+      :`<span style="font-size:2.5rem">${firstImg||'🛍️'}</span>`;
+    return `
+    <div class="cart-item">
+      <div class="cart-item-img">${imgHTML}</div>
+      <div class="cart-item-details">
+        <div class="cart-item-name">${i.name}</div>
+        <div class="cart-item-meta">${i.brand}</div>
+        <div class="cart-item-price">${fmt(i.price*i.qty)}</div>
+        <div class="cart-item-actions">
+          <button class="qty-btn" onclick="updateQty('${i.id}',-1)">−</button>
+          <span class="qty-display">${i.qty}</span>
+          <button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button>
+          <button class="remove-btn" onclick="removeFromCart('${i.id}')" title="Eliminar">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── FORMULARIO DE PEDIDO ──────────────────────────────────────────────
+function openCheckoutForm() {
+  if(Object.keys(cart).length===0){ showToast('⚠️ ¡Tu carrito está vacío!'); return; }
+  const items=Object.values(cart);
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById('formOrderItems').innerHTML=items.map(i=>
+    `<div class="form-order-item"><span>${i.name} ×${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`
+  ).join('');
+  document.getElementById('formOrderTotal').textContent=fmt(total);
+  ['clientName','clientPhone','clientAddress','clientNote'].forEach(id=>{
+    document.getElementById(id).value='';
+    document.getElementById(id).classList.remove('error');
+  });
+  ['nameError','phoneError','addressError'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('checkoutOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeCheckoutForm() {
+  document.getElementById('checkoutOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('checkoutOverlay').addEventListener('click',function(e){ if(e.target===this) closeCheckoutForm(); });
+
+function confirmOrder() {
+  const name    = document.getElementById('clientName').value.trim();
+  const phone   = document.getElementById('clientPhone').value.trim();
+  const address = document.getElementById('clientAddress').value.trim();
+  const note    = document.getElementById('clientNote').value.trim();
+  let valid=true;
+
+  if(!name){
+    document.getElementById('clientName').classList.add('error');
+    document.getElementById('nameError').classList.add('show');
+    valid=false;
+  } else {
+    document.getElementById('clientName').classList.remove('error');
+    document.getElementById('nameError').classList.remove('show');
+  }
+  if(!phone){
+    document.getElementById('clientPhone').classList.add('error');
+    document.getElementById('phoneError').classList.add('show');
+    valid=false;
+  } else {
+    document.getElementById('clientPhone').classList.remove('error');
+    document.getElementById('phoneError').classList.remove('show');
+  }
+  if(!address){
+    document.getElementById('clientAddress').classList.add('error');
+    document.getElementById('addressError').classList.add('show');
+    valid=false;
+  } else {
+    document.getElementById('clientAddress').classList.remove('error');
+    document.getElementById('addressError').classList.remove('show');
+  }
+  if(!valid){ showToast('⚠️ Por favor completa todos los campos obligatorios'); return; }
+
+  const items=Object.values(cart);
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+
+  const msg=
+    `🛍️ *NUEVO PEDIDO — EL CHULO*\n`+
+    `━━━━━━━━━━━━━━━━━━━━━━\n`+
+    `👤 *Nombre:* ${name}\n`+
+    `📞 *Teléfono:* ${phone}\n`+
+    `🏠 *Dirección:* ${address}\n`+
+    (note?`📝 *Nota:* ${note}\n`:'')+
+    `━━━━━━━━━━━━━━━━━━━━━━\n`+
+    `*PRODUCTOS:*\n`+
+    items.map(i=>`• ${i.name} ×${i.qty}  →  ${fmt(i.price*i.qty)}`).join('\n')+
+    `\n━━━━━━━━━━━━━━━━━━━━━━\n`+
+    `💰 *TOTAL: ${fmt(total)}*\n`+
+    `📅 ${new Date().toLocaleString('es-CU')}\n\n`+
+    `¡Hola! Me gustaría confirmar este pedido 😊`;
+
+  window.open(`https://wa.me/5355562204?text=${encodeURIComponent(msg)}`,'_blank');
+
+  showToast('✅ ¡Abriendo WhatsApp para confirmar tu pedido!');
+  closeCheckoutForm();
+  toggleCart();
+  cart={}; updateCartUI(); renderProducts();
+}
+
+// ── FAVORITOS ─────────────────────────────────────────────────────────
+function toggleWishlist(id,btn) {
+  if(wishlist.has(id)){ wishlist.delete(id); btn.textContent='🤍'; btn.classList.remove('active'); }
+  else { wishlist.add(id); btn.textContent='❤️'; btn.classList.add('active'); showToast('❤️ ¡Agregado a favoritos!'); }
+}
+
+// ── COMPARTIR ─────────────────────────────────────────────────────────
+function openShareModal() {
+  const items=Object.values(cart);
+  if(items.length===0){ showToast('⚠️ ¡Agrega artículos al carrito primero!'); return; }
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+  const ol=document.getElementById('shareOrderList');
+  ol.innerHTML=items.map(i=>{
+    const ico=(i.images&&i.images[0]&&!isUrl(i.images[0]))?i.images[0]:'🛍️';
+    return `<div class="share-order-item"><span>${ico} ${i.name} ×${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`;
+  }).join('');
+  ol.innerHTML+=`<div class="share-order-item" style="font-weight:700;background:#fafafa"><span>TOTAL</span><span>${fmt(total)}</span></div>`;
+  const t2=items.map(i=>`${i.name} x${i.qty} — ${fmt(i.price*i.qty)}`).join(', ');
+  document.getElementById('shareLinkInput').value=`https://elchulo.com/carrito?pedido=${btoa(encodeURIComponent(t2)).slice(0,40)}...`;
+  document.getElementById('shareModal').classList.add('open');
+}
+function closeShareModal() { document.getElementById('shareModal').classList.remove('open'); }
+function copyShareLink() {
+  const input=document.getElementById('shareLinkInput');
+  input.select(); input.setSelectionRange(0,9999);
+  try{document.execCommand('copy');}catch(e){}
+  showToast('🔗 ¡Enlace copiado al portapapeles!');
+}
+function shareVia(platform) {
+  const items=Object.values(cart);
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+  const text=encodeURIComponent(`¡Mira mi carrito en El Chulo! ${items.map(i=>i.name).join(', ')} — Total: ${fmt(total)} 🛍️`);
+  const urls={
+    whatsapp:`https://wa.me/?text=${text}`,
+    twitter:`https://twitter.com/intent/tweet?text=${text}`,
+    facebook:`https://www.facebook.com/sharer/sharer.php?u=https://elchulo.com&quote=${text}`,
+    email:`mailto:?subject=Mira%20mi%20pedido%20en%20El%20Chulo&body=${text}`
+  };
+  window.open(urls[platform],'_blank');
+  closeShareModal();
+  showToast('📤 Abriendo ventana para compartir...');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+renderProducts();
+</script>
+</body>
+</html>
